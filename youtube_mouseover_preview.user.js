@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         YouTube - Storyboards
+// @name         YouTube - Mouseover Preview
 // @namespace    https://github.com/LenAnderson/
 // @downloadURL  https://github.com/LenAnderson/YouTube-Mouseover-Preview/raw/master/youtube_mouseover_preview.user.js
 // @version      0.1
