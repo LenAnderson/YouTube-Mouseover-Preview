@@ -2,7 +2,7 @@
 // @name         YouTube - Mouseover Preview
 // @namespace    https://github.com/LenAnderson/
 // @downloadURL  https://github.com/LenAnderson/YouTube-Mouseover-Preview/raw/master/youtube_mouseover_preview.user.js
-// @version      1.0
+// @version      1.1
 // @author       LenAnderson
 // @match        https://www.youtube.com/*
 // @grant        none
@@ -26,6 +26,9 @@
     function initOn(base) {
         [].forEach.call(base.querySelectorAll('.yt-lockup-thumbnail a[href^="/watch"], .thumb-wrapper a[href^="/watch"'), function(link) {
             link.parentNode.addEventListener('mouseover', function() {
+                if (link.spinner) {
+                    link.spinner.style.opacity = 1;
+                }
                 if (link.storyboard) return;
                 var spinner = document.createElement('div');
                 spinner.style.position = 'absolute';
@@ -43,6 +46,14 @@
                 var container = link.querySelector('.yt-thumb.video-thumb, .yt-uix-simple-thumb-wrap.yt-uix-simple-thumb-related');
                 container.appendChild(spinner);
                 loadStoryboard(link).then(function(imgs) {
+                    if (imgs === false) {
+                        spinner.textContent = 'No Storyboard :(';
+                        link.spinner = spinner;
+                        setTimeout(function() {
+                            spinner.style.opacity = 0;
+                        }, 2000);
+                        return;
+                    }
                     var frame = document.createElement('img');
                     link.frame = frame;
                     frame.src = imgs[0].src;
@@ -52,9 +63,11 @@
                 });
             });
             link.parentNode.addEventListener('mousemove', function(evt) {
-                if (!link.storyboard) return;
+                if (!link.storyboard || link.spinner) return;
                 link.storyboard.then(function(imgs) {
-                    showFrame(link.querySelector('.yt-thumb.video-thumb, .yt-uix-simple-thumb-wrap.yt-uix-simple-thumb-related'), evt.clientX, link.frame, imgs);
+                    if (imgs !== false) {
+                        showFrame(link.querySelector('.yt-thumb.video-thumb, .yt-uix-simple-thumb-wrap.yt-uix-simple-thumb-related'), evt.clientX, link.frame, imgs);
+                    }
                 });
             });
             link.parentNode.addEventListener('mouseout', function(evt) {
@@ -63,6 +76,10 @@
                     el = el.parentElement;
                 }
                 if (el == link) return;
+                if (link.spinner) {
+                    link.spinner.style.opacity = 0;
+                    return;
+                }
                 hideFrame(link.frame);
             });
         });
@@ -117,22 +134,32 @@
             xhr.open('GET', link.href, true);
             xhr.addEventListener('load', function() {
                 var reg = /"storyboard_spec":\s*"(.*?)"/g;
-                var spec = reg.exec(xhr.responseText)[1];
-                reg = /(http.*?)\|.*?#M\$M#(.*?)\|.*?#M\$M#(.*?)$/g;
+                var spec = reg.exec(xhr.responseText);
+                if (!spec) {
+                    resolve(false);
+                    return;
+                }
+                spec = spec[1];
+                reg = /(http.*?)\|.*?#M\$M#(.*?)\|(\d+)#(\d+)#(\d+)#(\d+)#(\d+)#\d+#M\$M#(.*?)$/g;
                 spec = reg.exec(spec);
                 var http = spec[1].replace(/\\/g, '').replace('$L', '2');
-                var sigh = spec[3];
+                var frameW = spec[3]*1;
+                var frameH = spec[4]*1;
+                var frameCount = spec[5]*1;
+                var frameRowLength = spec[6]*1;
+                var frameRowCount = spec[7]*1;
+                var sigh = spec[8];
                 http += '?sigh='+sigh;
                 reg = /"length_seconds":\s*"(\d+)"/;
                 var length = reg.exec(xhr.responseText)[1];
-                var frames = length / (60 * 4);
                 var imgs = [];
                 var promises = [];
-                for (var i=0;i<frames;i++)(function(i) {
+                for (var i=0;i<Math.ceil(frameCount / frameRowLength / frameRowCount);i++)(function(i) {
                     promises.push(new Promise(function(resolve, reject) {
                         var img = new Image();
                         imgs[i] = img;
                         img.addEventListener('error', function() {
+                            console.warn(404, img.src);
                             imgs[i] = undefined;
                             resolve();
                         });
