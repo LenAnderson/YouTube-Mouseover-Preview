@@ -10,3 +10,9 @@ You need to have a UserScript extension (e.g. Tampermonkey for Chrome, Greasemon
 ## Known Issues
 - Some aspect ratios do not show correctly in the preview box.
 - Currently only the really small storyboard images (80x45px) can be shown. As a result the (resized) images are a bit blurry.
+
+
+## Credits
+These two script really helped me find my way around YouTube's storyboard feature:
+- [youtube-storyboard](https://github.com/bulutcy/youtube-storyboard) by bulutcy
+- [YouTube Storyboard Bookmarklet](https://ctrlq.org/code/19236-youtube-storyboard-bookmarklet) by Amit Agarwal
