@@ -14,7 +14,7 @@
         initOn(document);
         var mo = new MutationObserver(function(muts) {
             muts.forEach(function(mut) {
-                mut.addedNodes.forEach(function(node) {
+                [].forEach.call(mut.addedNodes, function(node) {
                     if (node instanceof HTMLElement) {
                         initOn(node);
                     }
