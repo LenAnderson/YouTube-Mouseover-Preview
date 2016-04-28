@@ -2,7 +2,7 @@
 // @name         YouTube - Mouseover Preview
 // @namespace    https://github.com/LenAnderson/
 // @downloadURL  https://github.com/LenAnderson/YouTube-Mouseover-Preview/raw/master/youtube_mouseover_preview.user.js
-// @version      0.1
+// @version      0.2
 // @author       LenAnderson
 // @match        https://www.youtube.com/*
 // @grant        none
@@ -10,13 +10,22 @@
 
 (function() {
     'use strict';
-
-
-
     function init() {
-        [].forEach.call(document.querySelectorAll('.yt-lockup-thumbnail a[href^="/watch"]'), function(link) {
+        initOn(document);
+        var mo = new MutationObserver(function(muts) {
+            muts.forEach(function(mut) {
+                mut.addedNodes.forEach(function(node) {
+                    if (node instanceof HTMLElement) {
+                        initOn(node);
+                    }
+                });
+            });
+        });
+        mo.observe(document.body, {childList: true, subtree: true});
+    }
+    function initOn(base) {
+        [].forEach.call(base.querySelectorAll('.yt-lockup-thumbnail a[href^="/watch"]'), function(link) {
             link.parentNode.addEventListener('mouseover', function() {
-                console.info('over', link.href);
                 if (link.storyboard) return;
                 var spinner = document.createElement('div');
                 spinner.style.position = 'absolute';
@@ -54,7 +63,6 @@
                     el = el.parentElement;
                 }
                 if (el == link) return;
-                console.info('out', evt.target);
                 hideFrame(link.frame);
             });
         });
@@ -75,12 +83,28 @@
             rows = (lastFrame+1) / 10;
             lastFrame += imgs[++i].frames;
         }
+        var w = imgs[i].width / 10;
+        var iw;
+        var ih;
+        var fw;
+        var fh;
+        if (container.offsetWidth / container.offsetHeight > w / 45) {
+            iw = Math.round(container.offsetWidth / w * imgs[i].width);
+            ih = Math.round(container.offsetWidth / w * imgs[i].height);
+            fw = container.offsetWidth;
+            fh = Math.round(container.offsetWidth / w * 45);
+        } else {
+            iw = Math.round(container.offsetHeight / 45 * imgs[i].width);
+            ih = Math.round(container.offsetHeight / 45 * imgs[i].height);
+            fw = Math.round(container.offsetHeight / 45 * w);
+            fh = container.offsetHeight;
+        }
         frame.src = imgs[i].src;
-        frame.style.height = container.offsetHeight / 45 * imgs[i].height + 'px';
+        frame.style.width = iw + 'px';
         var row = Math.floor(frameIdx / 10) - rows;
         var col = frameIdx % 10;
-        frame.style.top = -container.offsetHeight * row + 'px';
-        frame.style.left = -container.offsetWidth * col + 'px';
+        frame.style.top = -fh * row + 'px';
+        frame.style.left = -fw * col + 'px';
         frame.style.opacity = 1;
     }
     function hideFrame(frame) {
@@ -108,17 +132,16 @@
                     promises.push(new Promise(function(resolve, reject) {
                         var img = new Image();
                         imgs[i] = img;
-                        img.addEventListener('error', function() { console.info('error');
-                                                                  imgs[i] = undefined;
-                                                                  resolve();
-                                                                 });
-                        img.addEventListener('load', function() { console.info('load');
-                                                                 resolve();
-                                                                });
+                        img.addEventListener('error', function() {
+                            imgs[i] = undefined;
+                            resolve();
+                        });
+                        img.addEventListener('load', function() {
+                            resolve();
+                        });
                         img.src = http.replace('$N', 'M'+i);
                     }));
                 })(i);
-                console.warn(promises);
                 Promise.all(promises).then(function(){ resolve(imgs.filter(function(img) { return img !== undefined; })); });
             });
             xhr.send();
