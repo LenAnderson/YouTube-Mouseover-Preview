@@ -24,7 +24,7 @@
         mo.observe(document.body, {childList: true, subtree: true});
     }
     function initOn(base) {
-        [].forEach.call(base.querySelectorAll('.yt-lockup-thumbnail a[href^="/watch"], .thumb-wrapper a[href^="/watch"'), function(link) {
+        [].forEach.call(base.querySelectorAll('.yt-lockup-thumbnail a[href^="/watch"], .thumb-wrapper a[href^="/watch"]'), function(link) {
             link.parentNode.addEventListener('mouseover', function() {
                 if (link.spinner) {
                     link.spinner.style.opacity = 1;
