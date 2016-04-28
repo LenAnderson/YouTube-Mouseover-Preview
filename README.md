@@ -13,6 +13,6 @@ You need to have a UserScript extension (e.g. Tampermonkey for Chrome, Greasemon
 
 
 ## Credits
-These two script really helped me find my way around YouTube's storyboard feature:
+These two scripts really helped me find my way around YouTube's storyboard feature:
 - [youtube-storyboard](https://github.com/bulutcy/youtube-storyboard) by bulutcy
 - [YouTube Storyboard Bookmarklet](https://ctrlq.org/code/19236-youtube-storyboard-bookmarklet) by Amit Agarwal
