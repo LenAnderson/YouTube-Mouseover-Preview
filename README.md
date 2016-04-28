@@ -7,10 +7,6 @@ You need to have a UserScript extension (e.g. Tampermonkey for Chrome, Greasemon
 [Install this UserScript](https://github.com/LenAnderson/YouTube-Mouseover-Preview/raw/master/youtube_mouseover_preview.user.js)
 
 
-## Known Issues
-- Currently only the really small storyboard images (80x45px) can be shown. As a result the (resized) images are a bit blurry.
-
-
 ## Credits
 These two scripts really helped me find my way around YouTube's storyboard feature:
 - [youtube-storyboard](https://github.com/bulutcy/youtube-storyboard) by bulutcy
