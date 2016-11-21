@@ -1,6 +1,8 @@
 # YouTube - Mouseover Preview
 Uses YouTube's storyboard to show preview images when hovering a video's thumbnail.
 
+![Preview](http://i.imgur.com/Amm71hd.gif)
+
 ## Installation
 You need to have a UserScript extension (e.g. Tampermonkey for Chrome, Greasemonkey for Firefox) installed to run this script.
 
