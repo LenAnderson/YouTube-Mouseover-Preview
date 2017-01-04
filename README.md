@@ -1,5 +1,5 @@
 # YouTube - Mouseover Preview
-Uses YouTube's storyboard to show preview images when hovering a video's thumbnail.
+Uses YouTube's storyboard to show preview images when hovering a video's thumbnail. Hold shift while clicking to jump to the time shown in the preview image.
 
 ![Preview](http://i.imgur.com/Amm71hd.gif)
 
