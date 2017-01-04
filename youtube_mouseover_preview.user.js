@@ -2,7 +2,7 @@
 // @name         YouTube - Mouseover Preview
 // @namespace    https://github.com/LenAnderson/
 // @downloadURL  https://github.com/LenAnderson/YouTube-Mouseover-Preview/raw/master/youtube_mouseover_preview.user.js
-// @version      1.3
+// @version      1.4
 // @author       LenAnderson
 // @match        https://www.youtube.com/*
 // @grant        none
@@ -82,6 +82,19 @@
                 }
                 hideFrame(link.frame);
             });
+            if (link.parentNode.querySelector('.video-time')) {
+                var duration = 0;
+                var durations = link.parentNode.querySelector('.video-time').textContent.trim().split(':');
+                for (var i=0;i<durations.length;i++) {
+                    duration += durations[durations.length-1-i]*Math.pow(60,i);
+                }
+                link.addEventListener('click', function(evt) {
+                    if (evt.shiftKey && link.frame.time) {
+                        evt.preventDefault();
+                        location.href = link.href + '#t=' + Math.round(link.frame.time*duration);
+                    }
+                });
+            }
         });
     }
 
@@ -92,6 +105,7 @@
             totalFrames += it.frames;
         });
         x = x - container.getBoundingClientRect().left;
+        frame.time = x / container.offsetWidth;
         var frameIdx = Math.round(x / (container.offsetWidth / totalFrames));
         var lastFrame = -1;
         var i = -1;
