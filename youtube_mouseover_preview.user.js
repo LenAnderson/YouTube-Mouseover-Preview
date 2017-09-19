@@ -2,7 +2,7 @@
 // @name         YouTube - Mouseover Preview
 // @namespace    https://github.com/LenAnderson/
 // @downloadURL  https://github.com/LenAnderson/YouTube-Mouseover-Preview/raw/master/youtube_mouseover_preview.user.js
-// @version      1.4
+// @version      1.5
 // @author       LenAnderson
 // @match        https://www.youtube.com/*
 // @grant        none
@@ -24,7 +24,7 @@
         mo.observe(document.body, {childList: true, subtree: true});
     }
     function initOn(base) {
-        [].forEach.call(base.querySelectorAll('.yt-lockup-thumbnail a[href^="/watch"], .thumb-wrapper a[href^="/watch"]'), function(link) {
+        [].forEach.call(base.querySelectorAll('ytd-thumbnail a[href^="/watch"]'), function(link) {
             link.parentNode.addEventListener('mouseover', function() {
                 if (link.spinner) {
                     link.spinner.style.opacity = 1;
@@ -43,14 +43,16 @@
                 spinner.style.color = 'rgb(0,0,0)';
                 spinner.style.fontWeight = 'bold';
                 spinner.textContent = 'Loading Storyboard...';
-                var container = link.querySelector('.yt-thumb.video-thumb, .yt-uix-simple-thumb-wrap.yt-uix-simple-thumb-related');
+                var container = link.querySelector('yt-img-shadow');
                 container.appendChild(spinner);
+                link.querySelector('#mouseover-overlay').style.display = 'none';
                 loadStoryboard(link).then(function(imgs) {
                     if (imgs === false) {
                         spinner.textContent = 'No Storyboard :(';
                         link.spinner = spinner;
                         setTimeout(function() {
                             spinner.style.opacity = 0;
+                            link.querySelector('#mouseover-overlay').style.display = '';
                         }, 2000);
                         return;
                     }
@@ -66,7 +68,7 @@
                 if (!link.storyboard || link.spinner) return;
                 link.storyboard.then(function(imgs) {
                     if (imgs !== false) {
-                        showFrame(link.querySelector('.yt-thumb.video-thumb, .yt-uix-simple-thumb-wrap.yt-uix-simple-thumb-related'), evt.clientX, link.frame, imgs);
+                        showFrame(link.querySelector('yt-img-shadow'), evt.clientX, link.frame, imgs);
                     }
                 });
             });
@@ -82,9 +84,9 @@
                 }
                 hideFrame(link.frame);
             });
-            if (link.parentNode.querySelector('.video-time')) {
+            if (link.querySelector('ytd-thumbnail-overlay-time-status-renderer > .ytd-thumbnail-overlay-time-status-renderer')) {
                 var duration = 0;
-                var durations = link.parentNode.querySelector('.video-time').textContent.trim().split(':');
+                var durations = link.querySelector('ytd-thumbnail-overlay-time-status-renderer > .ytd-thumbnail-overlay-time-status-renderer').textContent.trim().split(':');
                 for (var i=0;i<durations.length;i++) {
                     duration += durations[durations.length-1-i]*Math.pow(60,i);
                 }
