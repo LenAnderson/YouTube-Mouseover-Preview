@@ -2,7 +2,7 @@
 // @name         YouTube - Mouseover Preview
 // @namespace    https://github.com/LenAnderson/
 // @downloadURL  https://github.com/LenAnderson/YouTube-Mouseover-Preview/raw/master/youtube_mouseover_preview.user.js
-// @version      1.5
+// @version      1.6
 // @author       LenAnderson
 // @match        https://www.youtube.com/*
 // @grant        none
@@ -74,7 +74,7 @@
             });
             link.parentNode.addEventListener('mouseout', function(evt) {
                 var el = evt.toElement;
-                while (el != link && el.parentElement) {
+                while (el && el != link && el.parentElement) {
                     el = el.parentElement;
                 }
                 if (el == link) return;
@@ -84,20 +84,30 @@
                 }
                 hideFrame(link.frame);
             });
-            if (link.querySelector('ytd-thumbnail-overlay-time-status-renderer > .ytd-thumbnail-overlay-time-status-renderer')) {
-                var duration = 0;
-                var durations = link.querySelector('ytd-thumbnail-overlay-time-status-renderer > .ytd-thumbnail-overlay-time-status-renderer').textContent.trim().split(':');
-                for (var i=0;i<durations.length;i++) {
-                    duration += durations[durations.length-1-i]*Math.pow(60,i);
+            link.addEventListener('click', function(evt) {
+                if (evt.shiftKey && link.frame.time && link.duration) {
+                    evt.preventDefault();
+                    location.href = link.href + '#t=' + Math.round(link.frame.time*link.duration);
                 }
-                link.addEventListener('click', function(evt) {
-                    if (evt.shiftKey && link.frame.time) {
-                        evt.preventDefault();
-                        location.href = link.href + '#t=' + Math.round(link.frame.time*duration);
-                    }
-                });
-            }
+            });
+            var durIv = setInterval(()=>{
+                getDuration(link);
+                if (link.duration) {
+                    clearInterval(durIv);
+                }
+            }, 100);
         });
+    }
+
+    function getDuration(link) {
+        if (link.parentNode.querySelector('ytd-thumbnail-overlay-time-status-renderer > .ytd-thumbnail-overlay-time-status-renderer')) {
+            var duration = 0;
+            var durations = link.parentNode.querySelector('ytd-thumbnail-overlay-time-status-renderer > .ytd-thumbnail-overlay-time-status-renderer').textContent.trim().split(':');
+            for (var i=0;i<durations.length;i++) {
+                duration += durations[durations.length-1-i]*Math.pow(60,i);
+            }
+            link.duration = duration;
+        }
     }
 
     function showFrame(container, x, frame, imgs) {
@@ -158,6 +168,10 @@
                 spec = spec[1];
                 reg = /(http.*?)\|.*?#M\$M#(.*?)\|(\d+)#(\d+)#(\d+)#(\d+)#(\d+)#\d+#M\$M#(.*?)$/g;
                 spec = reg.exec(spec);
+                if (!spec) {
+                    resolve(false);
+                    return;
+                }
                 var http = spec[1].replace(/\\/g, '').replace('$L', '2');
                 var frameW = spec[3]*1;
                 var frameH = spec[4]*1;
