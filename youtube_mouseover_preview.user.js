@@ -2,7 +2,7 @@
 // @name         YouTube - Mouseover Preview
 // @namespace    https://github.com/LenAnderson/
 // @downloadURL  https://github.com/LenAnderson/YouTube-Mouseover-Preview/raw/master/youtube_mouseover_preview.user.js
-// @version      1.6
+// @version      1.7
 // @author       LenAnderson
 // @match        https://www.youtube.com/*
 // @grant        none
@@ -166,7 +166,7 @@
                     return;
                 }
                 spec = spec[1];
-                reg = /(http.*?)\|.*?#M\$M#(.*?)\|(\d+)#(\d+)#(\d+)#(\d+)#(\d+)#\d+#M\$M#(.*?)$/g;
+                reg = /(http.*?)\|.*?#M\$M#(.*?)\|(\d+)#(\d+)#(\d+)#(\d+)#(\d+)#\d+#M\$M#([^|]*).*?$/g;
                 spec = reg.exec(spec);
                 if (!spec) {
                     resolve(false);
@@ -179,7 +179,7 @@
                 var frameRowLength = spec[6]*1;
                 var frameRowCount = spec[7]*1;
                 var sigh = spec[8];
-                http += '?sigh='+sigh;
+                http += '&sigh='+sigh;
                 reg = /"length_seconds":\s*"(\d+)"/;
                 var length = reg.exec(xhr.responseText)[1];
                 var imgs = [];
