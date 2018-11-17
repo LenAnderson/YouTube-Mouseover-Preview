@@ -2,7 +2,7 @@
 // @name         YouTube - Mouseover Preview
 // @namespace    https://github.com/LenAnderson/
 // @downloadURL  https://github.com/LenAnderson/YouTube-Mouseover-Preview/raw/master/youtube_mouseover_preview.user.js
-// @version      1.7
+// @version      1.8
 // @author       LenAnderson
 // @match        https://www.youtube.com/*
 // @grant        none
@@ -159,13 +159,13 @@
             var xhr = new XMLHttpRequest();
             xhr.open('GET', link.href, true);
             xhr.addEventListener('load', function() {
-                var reg = /"storyboard_spec":\s*"(.*?)"/g;
+                var reg = /playerStoryboardSpecRenderer.*?(\{.+?\})/g;
                 var spec = reg.exec(xhr.responseText);
                 if (!spec) {
                     resolve(false);
                     return;
                 }
-                spec = spec[1];
+                spec = JSON.parse(spec[1].replace(/\\(.)/g, '$1')).spec;
                 reg = /(http.*?)\|.*?#M\$M#(.*?)\|(\d+)#(\d+)#(\d+)#(\d+)#(\d+)#\d+#M\$M#([^|]*).*?$/g;
                 spec = reg.exec(spec);
                 if (!spec) {
