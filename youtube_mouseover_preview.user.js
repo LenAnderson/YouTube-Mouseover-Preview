@@ -2,7 +2,7 @@
 // @name         YouTube - Mouseover Preview
 // @namespace    https://github.com/LenAnderson/
 // @downloadURL  https://github.com/LenAnderson/YouTube-Mouseover-Preview/raw/master/youtube_mouseover_preview.user.js
-// @version      1.8
+// @version      1.9
 // @author       LenAnderson
 // @match        https://www.youtube.com/*
 // @grant        none
@@ -29,7 +29,7 @@
                 if (link.spinner) {
                     link.spinner.style.opacity = 1;
                 }
-                if (link.storyboard) return;
+                if (link.storyboard && link.storyboardHref == link.href) return;
                 var spinner = document.createElement('div');
                 spinner.style.position = 'absolute';
                 spinner.style.top = '0';
@@ -155,6 +155,7 @@
     }
 
     function loadStoryboard(link) {
+        link.storyboardHref = link.href;
         link.storyboard = new Promise(function(resolve, reject) {
             var xhr = new XMLHttpRequest();
             xhr.open('GET', link.href, true);
