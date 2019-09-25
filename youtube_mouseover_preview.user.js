@@ -2,7 +2,7 @@
 // @name         YouTube - Mouseover Preview
 // @namespace    https://github.com/LenAnderson/
 // @downloadURL  https://github.com/LenAnderson/YouTube-Mouseover-Preview/raw/master/youtube_mouseover_preview.user.js
-// @version      1.10
+// @version      1.11
 // @author       LenAnderson
 // @match        https://www.youtube.com/*
 // @grant        none
@@ -45,7 +45,8 @@
                 spinner.textContent = 'Loading Storyboard...';
                 var container = link.querySelector('yt-img-shadow');
                 container.appendChild(spinner);
-                link.querySelector('#mouseover-overlay').style.display = 'none';
+                var overlay = link.querySelector('#mouseover-overlay');
+                if (overlay) overlay.style.display = 'none';
                 loadStoryboard(link).then(function(imgs) {
                     if (imgs === false) {
                         spinner.textContent = 'No Storyboard :(';
