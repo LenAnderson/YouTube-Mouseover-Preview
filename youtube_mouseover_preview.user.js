@@ -2,7 +2,7 @@
 // @name         YouTube - Mouseover Preview
 // @namespace    https://github.com/LenAnderson/
 // @downloadURL  https://github.com/LenAnderson/YouTube-Mouseover-Preview/raw/master/youtube_mouseover_preview.user.js
-// @version      1.11
+// @version      1.12
 // @author       LenAnderson
 // @match        https://www.youtube.com/*
 // @grant        none
@@ -70,6 +70,7 @@
                 link.storyboard.then(function(imgs) {
                     if (imgs !== false) {
                         showFrame(link.querySelector('yt-img-shadow'), evt.clientX, link.frame, imgs);
+                        showTime(link.frame.time*link.duration, link);
                     }
                 });
             });
@@ -84,6 +85,7 @@
                     return;
                 }
                 hideFrame(link.frame);
+                hideTime(link);
             });
             link.addEventListener('click', function(evt) {
                 if (evt.shiftKey && link.frame.time && link.duration) {
@@ -101,14 +103,32 @@
     }
 
     function getDuration(link) {
-        if (link.parentNode.querySelector('ytd-thumbnail-overlay-time-status-renderer > .ytd-thumbnail-overlay-time-status-renderer')) {
+        if (link.parentNode.querySelector('ytd-thumbnail-overlay-time-status-renderer > span.ytd-thumbnail-overlay-time-status-renderer')) {
             var duration = 0;
-            var durations = link.parentNode.querySelector('ytd-thumbnail-overlay-time-status-renderer > .ytd-thumbnail-overlay-time-status-renderer').textContent.trim().split(':');
+            link.durationText = link.parentNode.querySelector('ytd-thumbnail-overlay-time-status-renderer > span.ytd-thumbnail-overlay-time-status-renderer').textContent;
+            var durations = link.parentNode.querySelector('ytd-thumbnail-overlay-time-status-renderer > span.ytd-thumbnail-overlay-time-status-renderer').textContent.trim().split(':');
             for (var i=0;i<durations.length;i++) {
                 duration += durations[durations.length-1-i]*Math.pow(60,i);
             }
             link.duration = duration;
         }
+    }
+
+    function showTime(time, link) {
+        let parts = [];
+        let idx = 0;
+        while (time > 0) {
+            let ttime = Math.floor(time / 60);
+            parts[idx] = Math.floor(time - ttime * 60);
+            idx++;
+            time = ttime;
+        }
+        const formatted = parts.reverse().map((it,idx)=>`${idx>0&&it<10?'0':''}${it}`).join(':');
+        link.parentNode.querySelector('ytd-thumbnail-overlay-time-status-renderer > span.ytd-thumbnail-overlay-time-status-renderer').textContent = formatted;
+        return formatted;
+    }
+    function hideTime(link) {
+        link.parentNode.querySelector('ytd-thumbnail-overlay-time-status-renderer > span.ytd-thumbnail-overlay-time-status-renderer').textContent = link.durationText;
     }
 
     function showFrame(container, x, frame, imgs) {
