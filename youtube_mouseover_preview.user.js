@@ -2,7 +2,7 @@
 // @name         YouTube - Mouseover Preview
 // @namespace    https://github.com/LenAnderson/
 // @downloadURL  https://github.com/LenAnderson/YouTube-Mouseover-Preview/raw/master/youtube_mouseover_preview.user.js
-// @version      1.12
+// @version      1.13
 // @author       LenAnderson
 // @match        https://www.youtube.com/*
 // @grant        none
@@ -138,8 +138,8 @@
             totalFrames += it.frames;
         });
         x = x - container.getBoundingClientRect().left;
-        frame.time = x / container.offsetWidth;
-        var frameIdx = Math.round(x / (container.offsetWidth / totalFrames));
+        frame.time = x / (container.offsetWidth || 0.01);
+        var frameIdx = Math.round(x / ((container.offsetWidth || 0.01) / totalFrames));
         var lastFrame = -1;
         var i = -1;
         var rows = 0;
