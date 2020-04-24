@@ -2,7 +2,7 @@
 // @name         YouTube - Mouseover Preview
 // @namespace    https://github.com/LenAnderson/
 // @downloadURL  https://github.com/LenAnderson/YouTube-Mouseover-Preview/raw/master/youtube_mouseover_preview.user.js
-// @version      1.13
+// @version      1.14
 // @author       LenAnderson
 // @match        https://www.youtube.com/*
 // @grant        none
@@ -25,7 +25,15 @@
     }
     function initOn(base) {
         [].forEach.call(base.querySelectorAll('ytd-thumbnail a[href^="/watch"]'), function(link) {
+			if (link.storyboardHref && link.storyboardHref != link.href) {
+                hideFrame(link.frame);
+                hideTime(link);
+				link.storyboard = undefined;
+				link.storyboardHref = undefined;
+				link.spinner = undefined;
+			}
             link.parentNode.addEventListener('mouseover', function() {
+				link.storyboardHover = true;
                 if (link.spinner) {
                     link.spinner.style.opacity = 1;
                 }
@@ -63,11 +71,16 @@
                     frame.style.position = 'absolute';
                     container.appendChild(frame);
                     container.removeChild(spinner);
+					if (!link.storyboardHover) {
+						hideFrame(link.frame);
+						hideTime(link);
+					}
                 });
             });
             link.parentNode.addEventListener('mousemove', function(evt) {
                 if (!link.storyboard || link.spinner) return;
                 link.storyboard.then(function(imgs) {
+					if (!link.storyboardHover) return;
                     if (imgs !== false) {
                         showFrame(link.querySelector('yt-img-shadow'), evt.clientX, link.frame, imgs);
                         showTime(link.frame.time*link.duration, link);
@@ -75,6 +88,7 @@
                 });
             });
             link.parentNode.addEventListener('mouseout', function(evt) {
+				link.storyboardHover = false;
                 var el = evt.toElement;
                 while (el && el != link && el.parentElement) {
                     el = el.parentElement;
@@ -172,6 +186,7 @@
         frame.style.opacity = 1;
     }
     function hideFrame(frame) {
+		if (!frame) return;
         frame.style.opacity = 0;
     }
 
