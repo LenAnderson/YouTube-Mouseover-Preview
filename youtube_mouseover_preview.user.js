@@ -2,7 +2,7 @@
 // @name         YouTube - Mouseover Preview
 // @namespace    https://github.com/LenAnderson/
 // @downloadURL  https://github.com/LenAnderson/YouTube-Mouseover-Preview/raw/master/youtube_mouseover_preview.user.js
-// @version      1.14
+// @version      1.15
 // @author       LenAnderson
 // @match        https://www.youtube.com/*
 // @grant        none
@@ -217,7 +217,7 @@
                 var frameRowCount = spec[7]*1;
                 var sigh = spec[8];
                 http += '&sigh='+sigh;
-                reg = /\\"approxDurationMs\\":\s*\\"(\d+)\\"/;
+                reg = /\\?"approxDurationMs\\?":\s*\\?"(\d+)\\?"/;
                 var length = reg.exec(xhr.responseText)[1] / 1000;
                 var imgs = [];
                 var promises = [];
