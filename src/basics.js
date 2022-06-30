@@ -1,4 +1,5 @@
 export const log = (...msgs)=>console.log.call(console.log, '[YT-MOP]', ...msgs);
+export const error = (...msgs)=>console.error.call(console.error, '[YT-MOP]', ...msgs);
 
 export const $ = (root,query)=>(query?root:document).querySelector(query?query:root);
 export const $$ = (root,query)=>Array.from((query?root:document).querySelectorAll(query?query:root));

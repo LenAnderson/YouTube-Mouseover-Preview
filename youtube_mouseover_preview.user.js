@@ -2,7 +2,7 @@
 // @name         YouTube - Mouseover Preview
 // @namespace    https://github.com/LenAnderson/
 // @downloadURL  https://github.com/LenAnderson/YouTube-Mouseover-Preview/raw/master/youtube_mouseover_preview.user.js
-// @version      2.0
+// @version      2.1
 // @author       LenAnderson
 // @match        https://www.youtube.com/*
 // @grant        none
@@ -20,6 +20,7 @@
 
 // src\basics.js
 const log = (...msgs)=>console.log.call(console.log, '[YT-MOP]', ...msgs);
+const error = (...msgs)=>console.error.call(console.error, '[YT-MOP]', ...msgs);
 
 const $ = (root,query)=>(query?root:document).querySelector(query?query:root);
 const $$ = (root,query)=>Array.from((query?root:document).querySelectorAll(query?query:root));
@@ -440,6 +441,12 @@ class MouseoverPreview {
 }
 // ---------------- /IMPORTS ----------------
 
+
+
+
+	
+	window.addEventListener('error', error);
+	window.addEventListener('unhandledrejection', error);
 
 
 
