@@ -38,6 +38,7 @@ export class Storyboard {
 			const frameH = spec[4]*1;
 			this.frameHeight = frameH;
 			const frameCount = spec[5]*1;
+			this.frameCount = frameCount;
 			const frameRowLength = spec[6]*1;
 			this.frameRowLength = frameRowLength;
 			const frameRowCount = spec[7]*1;
@@ -62,7 +63,7 @@ export class Storyboard {
 			})(i);
 			await Promise.all(promises);
 			this.sheets = sheets.filter(it=>it);
-			this.frameCount = this.sheets.reduce((sum,cur)=>sum+cur.frameCount,0);
+			// this.frameCount = this.sheets.reduce((sum,cur)=>sum+cur.frameCount,0);
 			this.exists = true;
 		} catch {
 			this.exists = false;
@@ -73,15 +74,13 @@ export class Storyboard {
 
 
 	getFrame(/**@type{Number}*/index) {
-		let lastFrame = -1;
+		let nextFirstFrame = 0;
 		let sheetIdx = -1;
-		let rows = 0;
-		while (sheetIdx+1 < this.sheets.length && lastFrame < index) {
-			rows = (lastFrame + 1) / this.frameRowLength;
-			lastFrame += this.sheets[++sheetIdx].frameCount;
+		while (sheetIdx+1 < this.sheets.length && nextFirstFrame <= index) {
+			nextFirstFrame += this.sheets[++sheetIdx].frameCount;
 		}
 		const sheet = this.sheets[sheetIdx];
 
-		return new StoryboardFrame(sheet, sheet.getFrame(index - (lastFrame - sheet.frameCount)));
+		return new StoryboardFrame(sheet, sheet.getFrame(index - (nextFirstFrame - sheet.frameCount)));
 	}
 }

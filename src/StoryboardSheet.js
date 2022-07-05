@@ -16,7 +16,7 @@ export class StoryboardSheet {
 		this.frameWidth = frameWidth;
 		this.frameHeight = frameHeight
 
-		this.frameCount = img.height / frameHeight * frameRowLength;
+		this.frameCount = (img.height / frameHeight) * (img.width / frameWidth);
 	}
 
 
