@@ -17,6 +17,8 @@ export class HoverTarget {
 	/**@type{HTMLElement}*/ spinner;
 	/**@type{HTMLElement}*/ spinnerText;
 	
+	/**@type{HTMLElement}*/ frameBlocker;
+	/**@type{HTMLElement}*/ frameContainer;
 	/**@type{HTMLElement}*/ frame;
 
 	/**@type{Storyboard}*/ storyboard;
@@ -70,21 +72,49 @@ export class HoverTarget {
 			await this.loadStoryboard();
 			this.loadDuration();
 			if (this.storyboard.exists) {
-				const frame = document.createElement('img'); {
-					this.frame = frame;
-					this.frame.classList.add('yt-mop--frame');
-					frame.style.position = 'absolute';
-					frame.style.marginLeft = '0';
-					frame.style.marginRight = '0';
-					frame.style.maxHeight = 'none';
-					frame.style.maxWidth = 'none';
-					frame.style.borderRadius = 'none';
-					this.container.append(frame);
-					if (this.isHovered) {
-						this.showFrame(0);
-					} else {
-						this.hideFrame();
+				const frameBlocker = document.createElement('div'); {
+					this.frameBlocker = frameBlocker;
+					frameBlocker.classList.add('yt-mop--frameBlocker');
+					frameBlocker.style.position = 'absolute';
+					frameBlocker.style.marginLeft = '0';
+					frameBlocker.style.marginRight = '0';
+					frameBlocker.style.top = '0';
+					frameBlocker.style.left = '0';
+					frameBlocker.style.bottom = '0';
+					frameBlocker.style.right = '0';
+					frameBlocker.style.overflow = 'hidden';
+					frameBlocker.style.backdropFilter = 'blur(10px)';
+					const frameContainer = document.createElement('div'); {
+						this.frameContainer = frameContainer;
+						frameContainer.classList.add('yt-mop--frameContainer');
+						frameContainer.style.position = 'absolute';
+						frameContainer.style.marginLeft = '0';
+						frameContainer.style.marginRight = '0';
+						frameContainer.style.top = '0';
+						frameContainer.style.left = '0';
+						frameContainer.style.bottom = '0';
+						frameContainer.style.right = '0';
+						frameContainer.style.overflow = 'hidden';
+						const frame = document.createElement('img'); {
+							this.frame = frame;
+							this.frame.classList.add('yt-mop--frame');
+							frame.style.display = 'block';
+							frame.style.position = 'absolute';
+							frame.style.marginLeft = '0';
+							frame.style.marginRight = '0';
+							frame.style.maxHeight = 'none';
+							frame.style.maxWidth = 'none';
+							frame.style.borderRadius = 'none';
+							frameContainer.append(frame);
+							if (this.isHovered) {
+								this.showFrame(0);
+							} else {
+								this.hideFrame();
+							}
+						}
+						frameBlocker.append(frameContainer);
 					}
+					this.container.append(frameBlocker);
 				}
 				this.hideSpinner();
 			} else {
@@ -140,31 +170,34 @@ export class HoverTarget {
 		const frameIdx = Math.max(Math.round(time * this.storyboard.frameCount), 0);
 		const frame = this.storyboard.getFrame(frameIdx);
 		this.frame.src = frame.src;
-		this.frame.style.display = 'block';
+		this.frameBlocker.style.display = 'block';
 
-		const w = frame.sheet.img.width / 5;
 		let iw;
 		let ih;
 		let fw;
 		let fh;
-		if (rect.width / rect.height > w / 90) {
-			iw = Math.round(rect.width / w * frame.sheet.img.width);
-			ih = Math.round(rect.width / w * frame.sheet.img.height);
+		if (rect.width / rect.height < this.storyboard.frameWidth / this.storyboard.frameHeight) {
+			iw = Math.round(rect.width / this.storyboard.frameWidth * frame.sheet.img.width);
+			ih = Math.round(rect.width / this.storyboard.frameWidth * frame.sheet.img.height);
 			fw = rect.width;
-			fh = Math.round(rect.width / w * 90);
+			fh = Math.round(rect.width / this.storyboard.frameWidth * this.storyboard.frameHeight);
 		} else {
-			iw = Math.round(rect.height / 90 * frame.sheet.img.width);
-			ih = Math.round(rect.height / 90 * frame.sheet.img.height);
-			fw = math.round(rect.height / 90 * w);
+			iw = Math.round(rect.height / this.storyboard.frameHeight * frame.sheet.img.width);
+			ih = Math.round(rect.height / this.storyboard.frameHeight * frame.sheet.img.height);
+			fw = Math.round(rect.height / this.storyboard.frameHeight * this.storyboard.frameWidth);
 			fh = rect.height;
 		}
+		this.frameContainer.style.left = `${(rect.width - fw)/2}px`;
+		this.frameContainer.style.right = `${(rect.width - fw)/2}px`;
+		this.frameContainer.style.top = `${(rect.height - fh)/2}px`;
+		this.frameContainer.style.bottom = `${(rect.height - fh)/2}px`;
 		this.frame.style.width = `${iw}px`;
 		this.frame.style.top = `${-fh * frame.row}px`;
 		this.frame.style.left = `${-fw * frame.col}px`;
 	}
 	hideFrame() {
 		if (!this.frame) return;
-		this.frame.style.display = 'none';
+		this.frameBlocker.style.display = 'none';
 		this.hideTime();
 	}
 

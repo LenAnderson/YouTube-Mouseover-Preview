@@ -5,6 +5,9 @@ export class Storyboard {
 	/**@type{String}*/ url;
 	/**@type{StoryboardSheet[]}*/ sheets;
 	/**@type{Number}*/ frameCount = 0;
+	/**@type{Number}*/ frameRowLength;
+	/**@type{Number}*/ frameWidth;
+	/**@type{Number}*/ frameHeight;
 	/**@type{boolean}*/ exists = false;
 
 
@@ -31,9 +34,12 @@ export class Storyboard {
 			}
 
 			const frameW = spec[3]*1;
+			this.frameWidth = frameW;
 			const frameH = spec[4]*1;
+			this.frameHeight = frameH;
 			const frameCount = spec[5]*1;
 			const frameRowLength = spec[6]*1;
+			this.frameRowLength = frameRowLength;
 			const frameRowCount = spec[7]*1;
 			const sigh = spec[8];
 			const http = `${spec[1].replace(/\\/g, '').replace('$L', '2')}&sigh=${sigh}`;
@@ -48,7 +54,7 @@ export class Storyboard {
 						resolve();
 					});
 					img.addEventListener('load', ()=>{
-						sheets[i] = new StoryboardSheet(img);
+						sheets[i] = new StoryboardSheet(img, frameRowLength, frameW, frameH);
 						resolve();
 					});
 					img.src = http.replace('$N', `M${i}`);
@@ -71,7 +77,7 @@ export class Storyboard {
 		let sheetIdx = -1;
 		let rows = 0;
 		while (sheetIdx+1 < this.sheets.length && lastFrame < index) {
-			rows = (lastFrame + 1) / 5;
+			rows = (lastFrame + 1) / this.frameRowLength;
 			lastFrame += this.sheets[++sheetIdx].frameCount;
 		}
 		const sheet = this.sheets[sheetIdx];

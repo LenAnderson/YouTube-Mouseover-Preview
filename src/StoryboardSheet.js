@@ -3,19 +3,26 @@ import { Coordinate } from "./Coordinate.js";
 export class StoryboardSheet {
 	/**@type{Image}*/ img;
 	/**@type{Number}*/ frameCount;
+	/**@type{Number}*/ frameRowLength;
+	/**@type{Number}*/ frameWidth;
+	/**@type{Number}*/ frameHeight;
 
 
 
 
-	constructor(/**@type{Image}*/img) {
+	constructor(/**@type{Image}*/img, /**@type{Number}*/frameRowLength, /**@type{Number}*/frameWidth, /**@type{Number}*/frameHeight) {
 		this.img = img;
-		this.frameCount = img.height / 90 * 5;
+		this.frameRowLength = frameRowLength;
+		this.frameWidth = frameWidth;
+		this.frameHeight = frameHeight
+
+		this.frameCount = img.height / frameHeight * frameRowLength;
 	}
 
 
 
 
 	getFrame(/**@type{Number}*/index) {
-		return new Coordinate(Math.floor(index/5), index%5);
+		return new Coordinate(Math.floor(index/this.frameRowLength), index%this.frameRowLength);
 	}
 }
