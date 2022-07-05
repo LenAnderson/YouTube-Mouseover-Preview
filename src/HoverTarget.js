@@ -3,22 +3,37 @@ import { Storyboard } from "./Storyboard.js";
 
 export class HoverTarget {
 	/**@type{HTMLElement}*/ thumb;
+	/**@type{HTMLElement}*/ container;
 	/**@type{HTMLAnchorElement}*/ link;
 	/**@type{String}*/ url;
 	
-	/**@type{HTMLElement}*/ durationElement;
+	/**@type{HTMLElement}*/ #durationElement;
 	/**@type{String}*/ durationText;
 	/**@type{Number}*/ duration;
 	/**@type{Number}*/ hoverTime;
 
 	/**@type{boolean}*/ isHovered = false;
 
-	/**@type{HTMLElement}*/spinner;
-	/**@type{HTMLElement}*/  spinnerText;
+	/**@type{HTMLElement}*/ spinner;
+	/**@type{HTMLElement}*/ spinnerText;
 	
-	/**@type{HTMLElement}*/  frame;
+	/**@type{HTMLElement}*/ frame;
 
 	/**@type{Storyboard}*/ storyboard;
+
+
+	get durationElement() {
+		if (!this.#durationElement) {
+			const renderer = $(this.link, 'ytd-thumbnail-overlay-time-status-renderer');
+			if (renderer) {
+				this.#durationElement = $(renderer.shadowRoot || renderer, '#text');
+			}
+		}
+		return this.#durationElement;
+	}
+	set durationElement(value) {
+		this.#durationElement = value;
+	}
 
 
 
@@ -47,7 +62,9 @@ export class HoverTarget {
 		if(this.link.href != this.url) {
 			log('load storyboard', this)
 			this.storyboard = null;
+			this.durationElement = null;
 			this.url = this.link.href;
+			this.container = $(this.link, 'yt-img-shadow').shadowRoot || $(this.link, 'yt-img-shadow');
 			this.hideOverlays();
 			this.makeSpinner();
 			await this.loadStoryboard();
@@ -62,7 +79,7 @@ export class HoverTarget {
 					frame.style.maxHeight = 'none';
 					frame.style.maxWidth = 'none';
 					frame.style.borderRadius = 'none';
-					$(this.link, 'yt-img-shadow').shadowRoot.append(frame);
+					this.container.append(frame);
 					if (this.isHovered) {
 						this.showFrame(0);
 					} else {
@@ -96,10 +113,9 @@ export class HoverTarget {
 	}
 
 	async loadDuration() {
-		let tries = 100;
+		let tries = 200;
 		while (tries-- > 0 && !this.durationElement) {
 			this.duration = 0;
-			this.durationElement = $($(this.link, 'ytd-thumbnail-overlay-time-status-renderer').shadowRoot, '#text');
 			if (this.durationElement) {
 				this.durationText = this.durationElement.textContent.trim();
 				const durParts = this.durationText.split(':');
@@ -153,21 +169,25 @@ export class HoverTarget {
 	}
 
 	showTime(/**@type{Number}*/time) {
-		time = Math.round(time * this.duration);
-		this.hoverTime = time;
-		const parts = [];
-		let idx = 0;
-		while (time > 0) {
-			const ttime = Math.floor(time / 60);
-			parts[idx] = Math.floor(time - ttime * 60);
-			idx++;
-			time = ttime;
+		if (this.durationElement) {
+			time = Math.round(time * this.duration);
+			this.hoverTime = time;
+			const parts = [];
+			let idx = 0;
+			while (time > 0) {
+				const ttime = Math.floor(time / 60);
+				parts[idx] = Math.floor(time - ttime * 60);
+				idx++;
+				time = ttime;
+			}
+			const formatted = parts.reverse().map((it,idx)=>`${idx>0&&it<10?'0':''}${it}`).join(':');
+			this.durationElement.textContent = formatted;
 		}
-		const formatted = parts.reverse().map((it,idx)=>`${idx>0&&it<10?'0':''}${it}`).join(':');
-		this.durationElement.textContent = formatted;
 	}
 	hideTime() {
-		this.durationElement.textContent = this.durationText;
+		if (this.durationElement) {
+			this.durationElement.textContent = this.durationText;
+		}
 	}
 
 
@@ -198,7 +218,7 @@ export class HoverTarget {
 				text.textContent = 'Loading Storyboard...';
 				spinner.append(text);
 			}
-			$(this.link, 'yt-img-shadow').shadowRoot.append(spinner);
+			this.container.append(spinner);
 		}
 	}
 	showSpinner() {
