@@ -56,20 +56,27 @@ class Coordinate {
 class StoryboardSheet {
 	/**@type{Image}*/ img;
 	/**@type{Number}*/ frameCount;
+	/**@type{Number}*/ frameRowLength;
+	/**@type{Number}*/ frameWidth;
+	/**@type{Number}*/ frameHeight;
 
 
 
 
-	constructor(/**@type{Image}*/img) {
+	constructor(/**@type{Image}*/img, /**@type{Number}*/frameRowLength, /**@type{Number}*/frameWidth, /**@type{Number}*/frameHeight) {
 		this.img = img;
-		this.frameCount = img.height / 90 * 5;
+		this.frameRowLength = frameRowLength;
+		this.frameWidth = frameWidth;
+		this.frameHeight = frameHeight
+
+		this.frameCount = (img.height / frameHeight) * (img.width / frameWidth);
 	}
 
 
 
 
 	getFrame(/**@type{Number}*/index) {
-		return new Coordinate(Math.floor(index/5), index%5);
+		return new Coordinate(Math.floor(index/this.frameRowLength), index%this.frameRowLength);
 	}
 }
 
@@ -112,6 +119,9 @@ class Storyboard {
 	/**@type{String}*/ url;
 	/**@type{StoryboardSheet[]}*/ sheets;
 	/**@type{Number}*/ frameCount = 0;
+	/**@type{Number}*/ frameRowLength;
+	/**@type{Number}*/ frameWidth;
+	/**@type{Number}*/ frameHeight;
 	/**@type{boolean}*/ exists = false;
 
 
@@ -138,9 +148,13 @@ class Storyboard {
 			}
 
 			const frameW = spec[3]*1;
+			this.frameWidth = frameW;
 			const frameH = spec[4]*1;
+			this.frameHeight = frameH;
 			const frameCount = spec[5]*1;
+			this.frameCount = frameCount;
 			const frameRowLength = spec[6]*1;
+			this.frameRowLength = frameRowLength;
 			const frameRowCount = spec[7]*1;
 			const sigh = spec[8];
 			const http = `${spec[1].replace(/\\/g, '').replace('$L', '2')}&sigh=${sigh}`;
@@ -155,7 +169,7 @@ class Storyboard {
 						resolve();
 					});
 					img.addEventListener('load', ()=>{
-						sheets[i] = new StoryboardSheet(img);
+						sheets[i] = new StoryboardSheet(img, frameRowLength, frameW, frameH);
 						resolve();
 					});
 					img.src = http.replace('$N', `M${i}`);
@@ -163,7 +177,7 @@ class Storyboard {
 			})(i);
 			await Promise.all(promises);
 			this.sheets = sheets.filter(it=>it);
-			this.frameCount = this.sheets.reduce((sum,cur)=>sum+cur.frameCount,0);
+			// this.frameCount = this.sheets.reduce((sum,cur)=>sum+cur.frameCount,0);
 			this.exists = true;
 		} catch {
 			this.exists = false;
@@ -174,16 +188,14 @@ class Storyboard {
 
 
 	getFrame(/**@type{Number}*/index) {
-		let lastFrame = -1;
+		let nextFirstFrame = 0;
 		let sheetIdx = -1;
-		let rows = 0;
-		while (sheetIdx+1 < this.sheets.length && lastFrame < index) {
-			rows = (lastFrame + 1) / 5;
-			lastFrame += this.sheets[++sheetIdx].frameCount;
+		while (sheetIdx+1 < this.sheets.length && nextFirstFrame <= index) {
+			nextFirstFrame += this.sheets[++sheetIdx].frameCount;
 		}
 		const sheet = this.sheets[sheetIdx];
 
-		return new StoryboardFrame(sheet, sheet.getFrame(index - (lastFrame - sheet.frameCount)));
+		return new StoryboardFrame(sheet, sheet.getFrame(index - (nextFirstFrame - sheet.frameCount)));
 	}
 }
 
@@ -194,22 +206,39 @@ class Storyboard {
 
 class HoverTarget {
 	/**@type{HTMLElement}*/ thumb;
+	/**@type{HTMLElement}*/ container;
 	/**@type{HTMLAnchorElement}*/ link;
 	/**@type{String}*/ url;
 	
-	/**@type{HTMLElement}*/ durationElement;
+	/**@type{HTMLElement}*/ #durationElement;
 	/**@type{String}*/ durationText;
 	/**@type{Number}*/ duration;
 	/**@type{Number}*/ hoverTime;
 
 	/**@type{boolean}*/ isHovered = false;
 
-	/**@type{HTMLElement}*/spinner;
-	/**@type{HTMLElement}*/  spinnerText;
+	/**@type{HTMLElement}*/ spinner;
+	/**@type{HTMLElement}*/ spinnerText;
 	
-	/**@type{HTMLElement}*/  frame;
+	/**@type{HTMLElement}*/ frameBlocker;
+	/**@type{HTMLElement}*/ frameContainer;
+	/**@type{HTMLElement}*/ frame;
 
 	/**@type{Storyboard}*/ storyboard;
+
+
+	get durationElement() {
+		if (!this.#durationElement) {
+			const renderer = $(this.link, 'ytd-thumbnail-overlay-time-status-renderer');
+			if (renderer) {
+				this.#durationElement = $(renderer.shadowRoot || renderer, '#text');
+			}
+		}
+		return this.#durationElement;
+	}
+	set durationElement(value) {
+		this.#durationElement = value;
+	}
 
 
 
@@ -238,27 +267,57 @@ class HoverTarget {
 		if(this.link.href != this.url) {
 			log('load storyboard', this)
 			this.storyboard = null;
+			this.durationElement = null;
 			this.url = this.link.href;
+			this.container = $(this.link, 'yt-img-shadow').shadowRoot || $(this.link, 'yt-img-shadow');
 			this.hideOverlays();
 			this.makeSpinner();
 			await this.loadStoryboard();
 			this.loadDuration();
 			if (this.storyboard.exists) {
-				const frame = document.createElement('img'); {
-					this.frame = frame;
-					this.frame.classList.add('yt-mop--frame');
-					frame.style.position = 'absolute';
-					frame.style.marginLeft = '0';
-					frame.style.marginRight = '0';
-					frame.style.maxHeight = 'none';
-					frame.style.maxWidth = 'none';
-					frame.style.borderRadius = 'none';
-					$(this.link, 'yt-img-shadow').shadowRoot.append(frame);
-					if (this.isHovered) {
-						this.showFrame(0);
-					} else {
-						this.hideFrame();
+				const frameBlocker = document.createElement('div'); {
+					this.frameBlocker = frameBlocker;
+					frameBlocker.classList.add('yt-mop--frameBlocker');
+					frameBlocker.style.position = 'absolute';
+					frameBlocker.style.marginLeft = '0';
+					frameBlocker.style.marginRight = '0';
+					frameBlocker.style.top = '0';
+					frameBlocker.style.left = '0';
+					frameBlocker.style.bottom = '0';
+					frameBlocker.style.right = '0';
+					frameBlocker.style.overflow = 'hidden';
+					frameBlocker.style.backdropFilter = 'blur(10px)';
+					const frameContainer = document.createElement('div'); {
+						this.frameContainer = frameContainer;
+						frameContainer.classList.add('yt-mop--frameContainer');
+						frameContainer.style.position = 'absolute';
+						frameContainer.style.marginLeft = '0';
+						frameContainer.style.marginRight = '0';
+						frameContainer.style.top = '0';
+						frameContainer.style.left = '0';
+						frameContainer.style.bottom = '0';
+						frameContainer.style.right = '0';
+						frameContainer.style.overflow = 'hidden';
+						const frame = document.createElement('img'); {
+							this.frame = frame;
+							this.frame.classList.add('yt-mop--frame');
+							frame.style.display = 'block';
+							frame.style.position = 'absolute';
+							frame.style.marginLeft = '0';
+							frame.style.marginRight = '0';
+							frame.style.maxHeight = 'none';
+							frame.style.maxWidth = 'none';
+							frame.style.borderRadius = 'none';
+							frameContainer.append(frame);
+							if (this.isHovered) {
+								this.showFrame(0);
+							} else {
+								this.hideFrame();
+							}
+						}
+						frameBlocker.append(frameContainer);
 					}
+					this.container.append(frameBlocker);
 				}
 				this.hideSpinner();
 			} else {
@@ -287,19 +346,17 @@ class HoverTarget {
 	}
 
 	async loadDuration() {
-		let tries = 100;
+		let tries = 200;
 		while (tries-- > 0 && !this.durationElement) {
-			this.duration = 0;
-			this.durationElement = $($(this.link, 'ytd-thumbnail-overlay-time-status-renderer').shadowRoot, '#text');
-			if (this.durationElement) {
-				this.durationText = this.durationElement.textContent.trim();
-				const durParts = this.durationText.split(':');
-				durParts.forEach((part,idx)=>{
-					this.duration += part * Math.pow(60, durParts.length - 1 - idx);
-				});
-			} else {
-				await wait(100);
-			}
+			await wait(200);
+		}
+		this.duration = 0;
+		if (this.durationElement) {
+			this.durationText = this.durationElement.textContent.trim();
+			const durParts = this.durationText.split(':');
+			durParts.forEach((part,idx)=>{
+				this.duration += part * Math.pow(60, durParts.length - 1 - idx);
+			});
 		}
 	}
 
@@ -315,50 +372,57 @@ class HoverTarget {
 		const frameIdx = Math.max(Math.round(time * this.storyboard.frameCount), 0);
 		const frame = this.storyboard.getFrame(frameIdx);
 		this.frame.src = frame.src;
-		this.frame.style.display = 'block';
+		this.frameBlocker.style.display = 'block';
 
-		const w = frame.sheet.img.width / 5;
 		let iw;
 		let ih;
 		let fw;
 		let fh;
-		if (rect.width / rect.height > w / 90) {
-			iw = Math.round(rect.width / w * frame.sheet.img.width);
-			ih = Math.round(rect.width / w * frame.sheet.img.height);
+		if (rect.width / rect.height < this.storyboard.frameWidth / this.storyboard.frameHeight) {
+			iw = Math.round(rect.width / this.storyboard.frameWidth * frame.sheet.img.width);
+			ih = Math.round(rect.width / this.storyboard.frameWidth * frame.sheet.img.height);
 			fw = rect.width;
-			fh = Math.round(rect.width / w * 90);
+			fh = Math.round(rect.width / this.storyboard.frameWidth * this.storyboard.frameHeight);
 		} else {
-			iw = Math.round(rect.height / 90 * frame.sheet.img.width);
-			ih = Math.round(rect.height / 90 * frame.sheet.img.height);
-			fw = math.round(rect.height / 90 * w);
+			iw = Math.round(rect.height / this.storyboard.frameHeight * frame.sheet.img.width);
+			ih = Math.round(rect.height / this.storyboard.frameHeight * frame.sheet.img.height);
+			fw = Math.round(rect.height / this.storyboard.frameHeight * this.storyboard.frameWidth);
 			fh = rect.height;
 		}
+		this.frameContainer.style.left = `${(rect.width - fw)/2}px`;
+		this.frameContainer.style.right = `${(rect.width - fw)/2}px`;
+		this.frameContainer.style.top = `${(rect.height - fh)/2}px`;
+		this.frameContainer.style.bottom = `${(rect.height - fh)/2}px`;
 		this.frame.style.width = `${iw}px`;
 		this.frame.style.top = `${-fh * frame.row}px`;
 		this.frame.style.left = `${-fw * frame.col}px`;
 	}
 	hideFrame() {
 		if (!this.frame) return;
-		this.frame.style.display = 'none';
+		this.frameBlocker.style.display = 'none';
 		this.hideTime();
 	}
 
 	showTime(/**@type{Number}*/time) {
-		time = Math.round(time * this.duration);
-		this.hoverTime = time;
-		const parts = [];
-		let idx = 0;
-		while (time > 0) {
-			const ttime = Math.floor(time / 60);
-			parts[idx] = Math.floor(time - ttime * 60);
-			idx++;
-			time = ttime;
+		if (this.durationElement && this.duration) {
+			time = Math.round(time * this.duration);
+			this.hoverTime = time;
+			const parts = [];
+			let idx = 0;
+			while (time > 0) {
+				const ttime = Math.floor(time / 60);
+				parts[idx] = Math.floor(time - ttime * 60);
+				idx++;
+				time = ttime;
+			}
+			const formatted = parts.reverse().map((it,idx)=>`${idx>0&&it<10?'0':''}${it}`).join(':');
+			this.durationElement.textContent = formatted;
 		}
-		const formatted = parts.reverse().map((it,idx)=>`${idx>0&&it<10?'0':''}${it}`).join(':');
-		this.durationElement.textContent = formatted;
 	}
 	hideTime() {
-		this.durationElement.textContent = this.durationText;
+		if (this.durationElement && this.duration) {
+			this.durationElement.textContent = this.durationText;
+		}
 	}
 
 
@@ -389,7 +453,7 @@ class HoverTarget {
 				text.textContent = 'Loading Storyboard...';
 				spinner.append(text);
 			}
-			$(this.link, 'yt-img-shadow').shadowRoot.append(spinner);
+			this.container.append(spinner);
 		}
 	}
 	showSpinner() {

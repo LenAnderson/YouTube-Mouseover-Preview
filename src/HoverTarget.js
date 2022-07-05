@@ -145,16 +145,15 @@ export class HoverTarget {
 	async loadDuration() {
 		let tries = 200;
 		while (tries-- > 0 && !this.durationElement) {
-			this.duration = 0;
-			if (this.durationElement) {
-				this.durationText = this.durationElement.textContent.trim();
-				const durParts = this.durationText.split(':');
-				durParts.forEach((part,idx)=>{
-					this.duration += part * Math.pow(60, durParts.length - 1 - idx);
-				});
-			} else {
-				await wait(100);
-			}
+			await wait(200);
+		}
+		this.duration = 0;
+		if (this.durationElement) {
+			this.durationText = this.durationElement.textContent.trim();
+			const durParts = this.durationText.split(':');
+			durParts.forEach((part,idx)=>{
+				this.duration += part * Math.pow(60, durParts.length - 1 - idx);
+			});
 		}
 	}
 
@@ -202,7 +201,7 @@ export class HoverTarget {
 	}
 
 	showTime(/**@type{Number}*/time) {
-		if (this.durationElement) {
+		if (this.durationElement && this.duration) {
 			time = Math.round(time * this.duration);
 			this.hoverTime = time;
 			const parts = [];
@@ -218,7 +217,7 @@ export class HoverTarget {
 		}
 	}
 	hideTime() {
-		if (this.durationElement) {
+		if (this.durationElement && this.duration) {
 			this.durationElement.textContent = this.durationText;
 		}
 	}
