@@ -2,7 +2,7 @@
 // @name         YouTube - Mouseover Preview
 // @namespace    https://github.com/LenAnderson/
 // @downloadURL  https://github.com/LenAnderson/YouTube-Mouseover-Preview/raw/master/youtube_mouseover_preview.user.js
-// @version      2.2
+// @version      2.3
 // @author       LenAnderson
 // @match        https://www.youtube.com/*
 // @grant        none
@@ -300,7 +300,7 @@ class HoverTarget {
 						frameContainer.style.overflow = 'hidden';
 						const frame = document.createElement('img'); {
 							this.frame = frame;
-							this.frame.classList.add('yt-mop--frame');
+							frame.classList.add('yt-mop--frame');
 							frame.style.display = 'block';
 							frame.style.position = 'absolute';
 							frame.style.marginLeft = '0';
@@ -308,6 +308,8 @@ class HoverTarget {
 							frame.style.maxHeight = 'none';
 							frame.style.maxWidth = 'none';
 							frame.style.borderRadius = 'none';
+							frame.style.objectFit = 'unset';
+							frame.style.height = 'auto';
 							frameContainer.append(frame);
 							if (this.isHovered) {
 								this.showFrame(0);
@@ -497,7 +499,7 @@ class MouseoverPreview {
 
 
 	initHoverTargets(/**@type{HTMLElement}*/root) {
-		$$(root, 'ytd-thumbnail a[href^="/watch"]:not([data-yt-mop])').forEach(link=>{
+		$$(root, 'ytd-thumbnail a[href^="/watch"]:not([data-yt-mop]), ytd-thumbnail a[href^="/shorts"]:not([data-yt-mop])').forEach(link=>{
 			const target = new HoverTarget(link);
 			this.targetList.push(target);
 		});

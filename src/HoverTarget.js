@@ -97,7 +97,7 @@ export class HoverTarget {
 						frameContainer.style.overflow = 'hidden';
 						const frame = document.createElement('img'); {
 							this.frame = frame;
-							this.frame.classList.add('yt-mop--frame');
+							frame.classList.add('yt-mop--frame');
 							frame.style.display = 'block';
 							frame.style.position = 'absolute';
 							frame.style.marginLeft = '0';
@@ -105,6 +105,8 @@ export class HoverTarget {
 							frame.style.maxHeight = 'none';
 							frame.style.maxWidth = 'none';
 							frame.style.borderRadius = 'none';
+							frame.style.objectFit = 'unset';
+							frame.style.height = 'auto';
 							frameContainer.append(frame);
 							if (this.isHovered) {
 								this.showFrame(0);
