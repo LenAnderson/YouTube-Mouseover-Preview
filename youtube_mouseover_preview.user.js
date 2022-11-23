@@ -2,7 +2,7 @@
 // @name         YouTube - Mouseover Preview
 // @namespace    https://github.com/LenAnderson/
 // @downloadURL  https://github.com/LenAnderson/YouTube-Mouseover-Preview/raw/master/youtube_mouseover_preview.user.js
-// @version      2.3
+// @version      2.4
 // @author       LenAnderson
 // @match        https://www.youtube.com/*
 // @grant        none
@@ -269,7 +269,7 @@ class HoverTarget {
 			this.storyboard = null;
 			this.durationElement = null;
 			this.url = this.link.href;
-			this.container = $(this.link, 'yt-img-shadow').shadowRoot || $(this.link, 'yt-img-shadow');
+			this.container = $(this.link, 'yt-image').shadowRoot || $(this.link, 'yt-image');
 			this.hideOverlays();
 			this.makeSpinner();
 			await this.loadStoryboard();

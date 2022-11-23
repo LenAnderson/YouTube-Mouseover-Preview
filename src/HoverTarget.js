@@ -66,7 +66,7 @@ export class HoverTarget {
 			this.storyboard = null;
 			this.durationElement = null;
 			this.url = this.link.href;
-			this.container = $(this.link, 'yt-img-shadow').shadowRoot || $(this.link, 'yt-img-shadow');
+			this.container = $(this.link, 'yt-image').shadowRoot || $(this.link, 'yt-image');
 			this.hideOverlays();
 			this.makeSpinner();
 			await this.loadStoryboard();
