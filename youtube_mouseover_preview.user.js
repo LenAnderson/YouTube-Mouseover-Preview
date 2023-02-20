@@ -2,7 +2,7 @@
 // @name         YouTube - Mouseover Preview
 // @namespace    https://github.com/LenAnderson/
 // @downloadURL  https://github.com/LenAnderson/YouTube-Mouseover-Preview/raw/master/youtube_mouseover_preview.user.js
-// @version      2.4
+// @version      2.5
 // @author       LenAnderson
 // @match        https://www.youtube.com/*
 // @grant        none
@@ -69,7 +69,7 @@ class StoryboardSheet {
 		this.frameWidth = frameWidth;
 		this.frameHeight = frameHeight
 
-		this.frameCount = (img.height / frameHeight) * (img.width / frameWidth);
+		this.frameCount = Math.floor((img.height / frameHeight) * (img.width / frameWidth));
 	}
 
 
