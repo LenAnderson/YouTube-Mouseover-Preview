@@ -1,5 +1,6 @@
 import { StoryboardFrame } from "./StoryboardFrame.js";
 import { StoryboardSheet } from "./StoryboardSheet.js";
+import { gm_fetch } from "./xhr.js";
 
 export class Storyboard {
 	/**@type{String}*/ url;
@@ -22,7 +23,7 @@ export class Storyboard {
 
 	async load() {
 		try {
-			const text = await (await (fetch(this.url))).text();
+			const text = await (await (gm_fetch(this.url))).text();
 			let spec = (/playerStoryboardSpecRenderer.*?(\{.+?\})/g).exec(text);
 			if (!spec) {
 				return;
