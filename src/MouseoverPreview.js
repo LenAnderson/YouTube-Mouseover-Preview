@@ -20,7 +20,7 @@ export class MouseoverPreview {
 
 
 	initHoverTargets(/**@type{HTMLElement}*/root) {
-		$$(root, 'ytd-thumbnail a[href^="/watch"]:not([data-yt-mop]), ytd-thumbnail a[href^="/shorts"]:not([data-yt-mop])').forEach(link=>{
+		$$(root, 'ytd-thumbnail a[href^="/watch"]:not([data-yt-mop]), ytd-thumbnail a[href^="/shorts"]:not([data-yt-mop]), ytm-shorts-lockup-view-model a[href^="/shorts"]:not([data-yt-mop])').forEach(link=>{
 			const target = new HoverTarget(link);
 			this.targetList.push(target);
 		});

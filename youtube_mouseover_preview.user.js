@@ -2,7 +2,7 @@
 // @name         YouTube - Mouseover Preview
 // @namespace    https://github.com/LenAnderson/
 // @downloadURL  https://github.com/LenAnderson/YouTube-Mouseover-Preview/raw/master/youtube_mouseover_preview.user.js
-// @version      2.6
+// @version      2.7
 // @author       LenAnderson
 // @match        https://www.youtube.com/*
 // @grant        GM_xmlhttpRequest
@@ -260,7 +260,7 @@ class HoverTarget {
 
 
 	constructor(/**@type{HTMLElement}*/link) {
-		this.thumb = link.closest('ytd-thumbnail');
+		this.thumb = link.closest('ytd-thumbnail, ytm-shorts-lockup-view-model');
 		this.link = link;
 		this.link.setAttribute('data-yt-mop', 1);
 		this.link.addEventListener('pointerenter', (evt)=>this.enter(evt));
@@ -285,7 +285,7 @@ class HoverTarget {
 			this.storyboard = null;
 			this.durationElement = null;
 			this.url = this.link.href;
-			this.container = $(this.link, 'yt-image').shadowRoot || $(this.link, 'yt-image');
+			this.container = $(this.link, 'yt-image, .shortsLockupViewModelHostThumbnailContainer ').shadowRoot || $(this.link, 'yt-image, .shortsLockupViewModelHostThumbnailContainer ');
 			this.hideOverlays();
 			this.makeSpinner();
 			await this.loadStoryboard();
@@ -515,7 +515,7 @@ class MouseoverPreview {
 
 
 	initHoverTargets(/**@type{HTMLElement}*/root) {
-		$$(root, 'ytd-thumbnail a[href^="/watch"]:not([data-yt-mop]), ytd-thumbnail a[href^="/shorts"]:not([data-yt-mop])').forEach(link=>{
+		$$(root, 'ytd-thumbnail a[href^="/watch"]:not([data-yt-mop]), ytd-thumbnail a[href^="/shorts"]:not([data-yt-mop]), ytm-shorts-lockup-view-model a[href^="/shorts"]:not([data-yt-mop])').forEach(link=>{
 			const target = new HoverTarget(link);
 			this.targetList.push(target);
 		});

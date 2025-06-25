@@ -41,7 +41,7 @@ export class HoverTarget {
 
 
 	constructor(/**@type{HTMLElement}*/link) {
-		this.thumb = link.closest('ytd-thumbnail');
+		this.thumb = link.closest('ytd-thumbnail, ytm-shorts-lockup-view-model');
 		this.link = link;
 		this.link.setAttribute('data-yt-mop', 1);
 		this.link.addEventListener('pointerenter', (evt)=>this.enter(evt));
@@ -66,7 +66,7 @@ export class HoverTarget {
 			this.storyboard = null;
 			this.durationElement = null;
 			this.url = this.link.href;
-			this.container = $(this.link, 'yt-image').shadowRoot || $(this.link, 'yt-image');
+			this.container = $(this.link, 'yt-image, .shortsLockupViewModelHostThumbnailContainer ').shadowRoot || $(this.link, 'yt-image, .shortsLockupViewModelHostThumbnailContainer ');
 			this.hideOverlays();
 			this.makeSpinner();
 			await this.loadStoryboard();
