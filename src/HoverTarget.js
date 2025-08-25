@@ -26,7 +26,7 @@ export class HoverTarget {
 
 	get durationElement() {
 		if (!this.#durationElement) {
-			const renderer = $(this.link, 'ytd-thumbnail-overlay-time-status-renderer');
+			const renderer = $(this.link, 'yt-thumbnail-overlay-badge-view-model, ytd-thumbnail-overlay-time-status-renderer');
 			if (renderer) {
 				this.#durationElement = $(renderer.shadowRoot || renderer, '#text');
 			}
@@ -41,7 +41,10 @@ export class HoverTarget {
 
 
 	constructor(/**@type{HTMLElement}*/link) {
-		this.thumb = link.closest('ytd-thumbnail, ytm-shorts-lockup-view-model');
+		this.thumb = link.closest('ytd-thumbnail, ytm-shorts-lockup-view-model') ?? $(link, 'yt-thumbnail-view-model');
+		if (!this.thumb) {
+			debugger;
+		}
 		this.link = link;
 		this.link.setAttribute('data-yt-mop', 1);
 		this.link.addEventListener('pointerenter', (evt)=>this.enter(evt));
@@ -66,7 +69,7 @@ export class HoverTarget {
 			this.storyboard = null;
 			this.durationElement = null;
 			this.url = this.link.href;
-			this.container = $(this.link, 'yt-image, .shortsLockupViewModelHostThumbnailContainer ').shadowRoot || $(this.link, 'yt-image, .shortsLockupViewModelHostThumbnailContainer ');
+			this.container = $(this.link, 'yt-thumbnail-view-model, yt-image, .shortsLockupViewModelHostThumbnailContainer ').shadowRoot || $(this.link, 'yt-thumbnail-view-model, yt-image, .shortsLockupViewModelHostThumbnailContainer ');
 			this.hideOverlays();
 			this.makeSpinner();
 			await this.loadStoryboard();
