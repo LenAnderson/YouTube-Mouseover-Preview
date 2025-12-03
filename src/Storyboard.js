@@ -24,11 +24,12 @@ export class Storyboard {
 	async load() {
 		try {
 			const text = await (await (gm_fetch(this.url))).text();
-			let spec = (/playerStoryboardSpecRenderer.*?(\{.+?\})/g).exec(text);
-			if (!spec) {
-				return;
-			}
-			spec = JSON.parse(spec[1].replace(/\\(.)/g, '$1')).spec;
+			const specRe = /<script [^>]*>\s*var ytInitialPlayerResponse\s*=\s*(\{.+?\});\s*var meta.*?<\/script>/s;
+			let spec = JSON.parse(specRe.exec(text)[1])
+				.storyboards
+				.playerStoryboardSpecRenderer
+				.spec
+			;
 			spec = (/(http.*?)\|.*?#M\$M#(.*?)\|(\d+)#(\d+)#(\d+)#(\d+)#(\d+)#\d+#M\$M#([^|]*).*?$/g).exec(spec);
 			if (!spec) {
 				return;

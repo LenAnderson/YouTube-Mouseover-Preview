@@ -2,7 +2,7 @@
 // @name         YouTube - Mouseover Preview
 // @namespace    https://github.com/LenAnderson/
 // @downloadURL  https://github.com/LenAnderson/YouTube-Mouseover-Preview/raw/master/youtube_mouseover_preview.user.js
-// @version      2.8
+// @version      2.9
 // @author       LenAnderson
 // @match        https://www.youtube.com/*
 // @grant        GM_xmlhttpRequest
@@ -153,11 +153,12 @@ class Storyboard {
 	async load() {
 		try {
 			const text = await (await (gm_fetch(this.url))).text();
-			let spec = (/playerStoryboardSpecRenderer.*?(\{.+?\})/g).exec(text);
-			if (!spec) {
-				return;
-			}
-			spec = JSON.parse(spec[1].replace(/\\(.)/g, '$1')).spec;
+			const specRe = /<script [^>]*>\s*var ytInitialPlayerResponse\s*=\s*(\{.+?\});\s*var meta.*?<\/script>/s;
+			let spec = JSON.parse(specRe.exec(text)[1])
+				.storyboards
+				.playerStoryboardSpecRenderer
+				.spec
+			;
 			spec = (/(http.*?)\|.*?#M\$M#(.*?)\|(\d+)#(\d+)#(\d+)#(\d+)#(\d+)#\d+#M\$M#([^|]*).*?$/g).exec(spec);
 			if (!spec) {
 				return;
